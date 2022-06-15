@@ -1,0 +1,25 @@
+{{/* template definition - header --starts-- */}}
+{{define "header"}}
+<section class="section">
+  <div class="container">
+    <div class="columns is-multiline">
+      <div class="column is-12 has-text-centered">
+        <h1 class="title is-1">
+          PASSER Locker Station - ({{ .Station }})
+        </h1>
+      </div>
+      <div class="column is-12 has-text-centered">
+        <h2 class="is-size-4">Parcel Drop-Off & Pick-Up</h2>
+        <h2 class="is-size-4">@ MRT Stations and Your Convenience</h2>                
+      </div>
+      <div class="column is-12 has-text-centered">
+        <div class="block my-4">
+          <h2 class="is-size-3">{{.Title}}</h2>                
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</section>
+{{end}}
+{{/* template definition - header --ends-- */}}

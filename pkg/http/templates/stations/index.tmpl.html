@@ -1,0 +1,52 @@
+{{define "title"}}{{.Title}}-PASSER Locker Station{{end}}
+
+{{define "main"}}
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered is-multiline">
+      {{/* check-in */}}
+      <div class="column is-half has-text-centered">
+        
+        
+          <div class="box has-background-primary">
+            <h1 class="title has-text-white">CHECK-IN</h1>
+            <h2 class="subtitle is-size-7 has-text-white">(PASSER Agent Use Only)</h2>
+            <br>
+          </div>
+        
+      
+      </div>
+      <div class="column is-half has-text-centered">
+        <a href="/checkout">
+          <div class="box has-background-danger">
+            <h1 class="title has-text-white">CHECK-OUT</h1>
+            <h2 class="subtitle is-size-7 has-text-white">(PASSER Agent Use Only)</h2>
+            <br>
+          </div>
+        </a>
+      </div>
+
+      {{/* picup */}}
+      <div class="column is-half has-text-centered">
+        
+        
+          <div class="box has-background-danger">
+            <h1 class="title has-text-white">PICK-UP</h1>
+            <br>
+          </div>
+        
+
+      </div>
+      <div class="column is-half has-text-centered">
+        <a href="/dropoff">
+          <div class="box has-background-primary">
+            <h1 class="title has-text-white">DROP-OFF</h1>
+            <br>
+          </div>
+        </a>
+      </div>
+    </div>
+    
+  </div>
+</section>
+{{end}}
