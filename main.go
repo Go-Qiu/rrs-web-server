@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-qiu/rrs-web-server/pkg/application"
+	"github.com/go-qiu/rrs-web-server/pkg/controllers"
+	"github.com/go-qiu/rrs-web-server/pkg/http/routers"
 	"github.com/joho/godotenv"
 )
 
@@ -20,8 +23,24 @@ func main() {
 	}
 	SERVER_ADDR := os.Getenv("SERVER_ADDR")
 
-	// start http server
-	log.Printf("HTTPS Server started and listening on https://%s ...\n", SERVER_ADDR)
-	log.Fatalln(http.ListenAndServeTLS(SERVER_ADDR, "./ssl/cert03.pem", "./ssl/key03.pem", nil))
+	// set the custom router.
+	router := routers.New()
 
+	// instantiate a controllers.
+	authCtl := controllers.NewAuthCtl("Auth-SingPass", "Singpass-key")
+
+	app := application.New()
+	app.Controllers.Auth = authCtl
+	app.Router = router
+
+	// instantiate a custom http server.
+	srv := http.Server{
+		Addr:    SERVER_ADDR,
+		Handler: app.Router,
+	}
+
+	// start http server.
+	log.Printf("HTTPS Server started and listening on https://%s ...\n", SERVER_ADDR)
+	log.Fatalln(srv.ListenAndServeTLS("./ssl/localhost.cert.pem", "./ssl/localhost.key.pem"))
+	//
 }
