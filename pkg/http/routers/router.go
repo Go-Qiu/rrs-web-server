@@ -1,8 +1,7 @@
 package routers
 
 import (
-	"net/http"
-
+	"github.com/go-qiu/rrs-web-server/pkg/controllers"
 	"github.com/go-qiu/rrs-web-server/pkg/http/handlers"
 	"github.com/gorilla/mux"
 )
@@ -13,21 +12,25 @@ func New() *mux.Router {
 	// instantiate a gorilla/mux reouter.
 	r := mux.NewRouter()
 
-	// register all the defined routes.
-	// parentGeneric := r.PathPrefix("/api/v1").Subrouter()
+	// api routesrs
+	apiRouter := r.PathPrefix("/api/v1").Subrouter()
+	usersAPIRouter := apiRouter.PathPrefix("/users").Subrouter()
+	vouchersAPIRouter := apiRouter.PathPrefix("/vouchers").Subrouter()
+	merchantsAPIRouter := apiRouter.PathPrefix("/merchants").Subrouter()
 
-	// authentication routes
-	// handlers := make(map[string]func(w http.ResponseWriter, r *http.Request))
-	// handlers["/"] = Auth
-	// handlers["/verifytoken"] = VerifyToken
+	RegisterAuthRouter(apiRouter, controllers.NewAuthCtl("auth", "singpass-api-key"))
+	RegisterUsersRouter(usersAPIRouter, controllers.NewUsersCtl("users", "users-api-key"))
+	RegisterVouchersRouter(vouchersAPIRouter, controllers.NewVouchersCtl("vouchers", "vouchers-api-key"))
+	RegisterMerchantsRouter(merchantsAPIRouter, controllers.NewMerchantsCtl("merchants", "merchant-api-key"))
 
-	// RegisterHandlersWithRouter(parentGeneric, handlers)
+	// server-side-generated pages routers.
 
 	// login
-	r.HandleFunc("/", handlers.ServeHtmlIndex)
+	// r.HandleFunc("/", handlers.ServeHtmlIndex)
 	// r.HandleFunc("/login", handlers.ServeHtmlLogin)
 
 	// users routes
+
 	r.HandleFunc("/users", handlers.ServeHtmlIndexUsers)
 
 	// vouchers routes
@@ -47,16 +50,16 @@ func New() *mux.Router {
 }
 
 // RegisterRoutes bind children routes to a parent route.
-func RegisterHandlersWithRouter(router *mux.Router, handlers map[string]func(w http.ResponseWriter, r *http.Request)) {
+// func RegisterHandlersWithRouter(router *mux.Router, handlers map[string]func(w http.ResponseWriter, r *http.Request)) {
 
-	router.HandleFunc("/", handlers["/"]).Methods("POST")
-	router.HandleFunc("/verifytoken", handlers["/verifytoken"]).Methods("GET")
-}
+// 	router.HandleFunc("/", handlers["/"]).Methods("POST")
+// 	router.HandleFunc("/verifytoken", handlers["/verifytoken"]).Methods("GET")
+// }
 
-func Auth(w http.ResponseWriter, r *http.Request) {
+// func Auth(w http.ResponseWriter, r *http.Request) {
 
-}
+// }
 
-func VerifyToken(w http.ResponseWriter, r *http.Request) {
+// func VerifyToken(w http.ResponseWriter, r *http.Request) {
 
-}
+// }

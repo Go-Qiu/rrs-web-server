@@ -46,7 +46,9 @@ func (a *AuthCtl) Auth(w http.ResponseWriter, r *http.Request) {
 		"ok": true,
 		"msg": "[AUTH-CTL]: authentication ok",
 		"data": {
-			"token": "%s"
+			"token": "%s",
+			"id" : "USERS.20220602.975310",
+			"name": "James Dean"
 		}
 	}`, token)
 
