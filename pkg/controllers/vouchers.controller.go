@@ -92,28 +92,48 @@ func (v *VouchersCtl) HandlePostRequest(w http.ResponseWriter, r *http.Request) 
 
 	// need to replace with code that reads the action value from the request body.
 
-	action := "CONVERT-POINTS-TO-VOUCHERS"
+	// action := "CONVERT-POINTS-TO-VOUCHERS"
+	action := "DEPOSIT-FUND"
+
 	inputs := InConvertPointsToVouchers{}
 	w.Header().Set("Content-Type", "application/json")
 
 	// data in json string format
 	data := ""
+	var respBody string
 
-	if action == "CONVET-POINT-TO-VOUCHERS" {
+	if action == "CONVERT-POINT-TO-VOUCHERS" {
+
+		// handles the convert points to vouchers post request
 		err := convertPointsToVouchers(inputs)
 		if err != nil {
 			// error handling code (to be done)
 			log.Println(err)
 		}
+
+		// more code here (maybe)
+		// ok.
+		respBody = fmt.Sprintf(`{
+			"ok" : true,
+			"msg" : "[MS-VOUCHERS]: converted points to vouchers, successful",
+			"data" : {%s}
+		}`, data)
+
+		//
+	} else if action == "DEPOSIT-FUND" {
+
+		// handles the merchant deposit fund post request (code to be done)
+
+		// ok.
+		respBody = fmt.Sprintf(`{
+			"ok" : true,
+			"msg" : "[MS-VOUCHERS]: merchant fund deposit, successful",
+			"data" : {%s}
+		}`, data)
+		//
 	}
 
-	// ok.
-	respBody := fmt.Sprintf(`{
-		"ok" : true,
-		"msg" : "[MS-VOUCHERS]: converted points to vouchers, successful",
-		"data" : {%s}
-	}`, data)
-
+	// finally.
 	// send response to the requesting device
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(respBody))
