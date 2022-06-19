@@ -20,7 +20,7 @@ func ServeHtmlIndex(w http.ResponseWriter, r *http.Request) {
 
 	files := []string{
 		"./pkg/http/templates/base.tmpl.html",
-		"./pkg/http/templates/stations/header.tmpl.html",
+		"./pkg/http/templates/header.tmpl.html",
 		"./pkg/http/templates/stations/index.tmpl.html",
 	}
 

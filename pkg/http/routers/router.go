@@ -2,6 +2,7 @@ package routers
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/go-qiu/rrs-web-server/pkg/http/handlers"
 	"github.com/gorilla/mux"
@@ -12,6 +13,7 @@ func New() *mux.Router {
 
 	// instantiate a gorilla/mux reouter.
 	r := mux.NewRouter()
+	PUBLIC := os.Getenv("PUBLIC")
 
 	// register all the defined routes.
 	// parentGeneric := r.PathPrefix("/api/v1").Subrouter()
@@ -24,7 +26,8 @@ func New() *mux.Router {
 	// RegisterHandlersWithRouter(parentGeneric, handlers)
 
 	// login
-	r.HandleFunc("/", handlers.ServeHtmlIndex)
+
+	r.HandleFunc("/", handlers.RequestForRoot)
 	// r.HandleFunc("/login", handlers.ServeHtmlLogin)
 
 	// users routes
@@ -43,6 +46,9 @@ func New() *mux.Router {
 	// stationRoutes.HandleFunc("/", handlers.ServerHtmlStationIndex)
 	// stationRoutes.HandleFunc("/dropoff", handlers.ServerHtmlStationDropOff)
 
+	// static web pages or assets router
+	fp := http.FileServer(http.Dir(PUBLIC))
+	r.PathPrefix("/public").Handler(http.StripPrefix("/public/", fp))
 	return r
 }
 
