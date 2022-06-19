@@ -27,8 +27,8 @@ func New() *mux.Router {
 
 	// login
 
-	r.HandleFunc("/", handlers.RequestForRoot)
-	// r.HandleFunc("/login", handlers.ServeHtmlLogin)
+	r.HandleFunc("/", handlers.ServeHtmlIndex)
+	r.HandleFunc("/login", handlers.ServeHtmlLogin)
 
 	// users routes
 	r.HandleFunc("/users", handlers.ServeHtmlIndexUsers)
