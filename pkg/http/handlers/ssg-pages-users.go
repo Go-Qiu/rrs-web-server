@@ -45,7 +45,7 @@ func ServeHtmlUserProfile(w http.ResponseWriter, r *http.Request) {
 	files := []string{
 		"./pkg/http/templates/base.tmpl.html",
 		"./pkg/http/templates/header.tmpl.html",
-		"./pkg/http/templates/stations/index.tmpl.html",
+		"./pkg/http/templates/users/profile.tmpl.html",
 	}
 
 	ts, err := template.ParseFiles(files...)
