@@ -17,17 +17,18 @@ func New() *mux.Router {
 
 	r.HandleFunc("/", handlers.ServeHtmlIndex)
 	r.HandleFunc("/login", handlers.ServeHtmlLogin)
+	r.HandleFunc("/logout", handlers.ServeHtmlLogout)
 
 	// users routes
 	r.HandleFunc("/users", handlers.ServeHtmlIndexUsers)
-	r.HandleFunc("/users/{id}/profile", handlers.ServeHtmlUserProfile)
+	r.HandleFunc("/users/registration", handlers.ServeHtmlLogin)
+	r.HandleFunc("/users/{id}", handlers.ServeHtmlUserProfile)
 	r.HandleFunc("/users/{id}/transactions", handlers.ServeHtmlUserRecyclableTransactions)
 	r.HandleFunc("/users/{id}/vouchers", handlers.ServeHtmlUserVouchers)
+	r.HandleFunc("/users/{id}/points_to_vouchers/redepmtion", handlers.ServeHtmlUserPointsToVouchers)
 
 	// vouchers routes
 	r.HandleFunc("/vouchers", handlers.ServeHtmlIndexVouchers)
-
-	// r.HandleFunc("/vouchers/sponsors/", h)
 
 	// merchants routes
 	r.HandleFunc("/merchants", handlers.ServeHtmlIndexMerchants)
@@ -45,12 +46,4 @@ func RegisterHandlersWithRouter(router *mux.Router, handlers map[string]func(w h
 
 	router.HandleFunc("/", handlers["/"]).Methods("POST")
 	router.HandleFunc("/verifytoken", handlers["/verifytoken"]).Methods("GET")
-}
-
-func Auth(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func VerifyToken(w http.ResponseWriter, r *http.Request) {
-
 }
