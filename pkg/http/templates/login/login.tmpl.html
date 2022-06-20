@@ -1,0 +1,63 @@
+{{define "title"}}
+  {{.Title}}-Recycle & Reward System
+{{end}}
+
+{{define "main"}}
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered is-multiline">
+      <div class="column is-3 has-text-centered">
+        <form action="" method="POST">
+          <div class="columns is-centered is-multiline">
+            
+            <!-- row #1 starts -->
+            <div class="column is-12 has-text-centered">
+              
+              <!-- Field Input starts -->
+              <div class="field">
+                <label class="label">Mobile Phone #:</label>
+                <div class="control">
+                  <input class="input" type="text" placeholder="+65 xxxxxxxx">
+                </div>
+              </div>
+              <!-- Field Input ends -->
+
+            </div>
+            <!-- row #1 ends -->
+            <!-- row #2 starts-->
+            <div class="column is-12 has-text-centered">
+              
+              <!-- field input starts -->
+              <div class="field">
+                <label class="label">Password:</label>
+                <div class="control">
+                  <input class="input" type="password" placeholder="enter your secret password here ...">
+                </div>
+              </div>
+              <!-- field input ends -->
+
+            </div>
+            <!-- row #2 ends -->
+            <!-- row #3 starts-->
+            <div class="column is-12 has-text-centered">
+              
+              <!-- field input starts -->
+              <div class="field">
+                <a href="/">
+                  <div class="button mr-4 is-danger">Cancel</div>
+                </a>
+                <input type="submit" class="button ml-4 is-primary" value="Login"/>
+              </div>
+              <!-- field input ends -->
+
+            </div>
+            <!-- row #2 ends -->
+          </div>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+{{end}}
