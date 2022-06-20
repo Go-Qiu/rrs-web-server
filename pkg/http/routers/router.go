@@ -15,23 +15,14 @@ func New() *mux.Router {
 	r := mux.NewRouter()
 	PUBLIC := os.Getenv("PUBLIC")
 
-	// register all the defined routes.
-	// parentGeneric := r.PathPrefix("/api/v1").Subrouter()
-
-	// authentication routes
-	// handlers := make(map[string]func(w http.ResponseWriter, r *http.Request))
-	// handlers["/"] = Auth
-	// handlers["/verifytoken"] = VerifyToken
-
-	// RegisterHandlersWithRouter(parentGeneric, handlers)
-
-	// login
-
 	r.HandleFunc("/", handlers.ServeHtmlIndex)
 	r.HandleFunc("/login", handlers.ServeHtmlLogin)
 
 	// users routes
 	r.HandleFunc("/users", handlers.ServeHtmlIndexUsers)
+	r.HandleFunc("/users/{id}/profile", handlers.ServeHtmlUserProfile)
+	r.HandleFunc("/users/{id}/transactions", handlers.ServeHtmlUserRecyclableTransactions)
+	r.HandleFunc("/users/{id}/vouchers", handlers.ServeHtmlUserVouchers)
 
 	// vouchers routes
 	r.HandleFunc("/vouchers", handlers.ServeHtmlIndexVouchers)
@@ -40,11 +31,8 @@ func New() *mux.Router {
 
 	// merchants routes
 	r.HandleFunc("/merchants", handlers.ServeHtmlIndexMerchants)
-
-	// station routes
-	// stationRoutes := generic.PathPrefix("/station").Subrouter()
-	// stationRoutes.HandleFunc("/", handlers.ServerHtmlStationIndex)
-	// stationRoutes.HandleFunc("/dropoff", handlers.ServerHtmlStationDropOff)
+	r.HandleFunc("/merchants/{id}/vouchers/aquired", handlers.ServeHtmlMerchantVouchersAquired)
+	r.HandleFunc("/merchants/{id}/vouchers/capture", handlers.ServeHtmlMerchantVoucherCapture)
 
 	// static web pages or assets router
 	fp := http.FileServer(http.Dir(PUBLIC))
