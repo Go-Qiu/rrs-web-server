@@ -5,44 +5,50 @@
 {{define "main"}}
 <section class="section">
   <div class="container">
-    <div class="columns is-centered is-multiline">
-      
-      <!-- Points To Vouchers Rate row starts -->
-      <div class="column is-8 has-text-centered">
+    <form action="" method="POST"></form>
+      <div class="columns is-centered is-multiline">
         
-        <div class="columns is-centered is-multiline">
-          <div class="column is-12 has-text-centered has-background-primary">
-            <h3 class="title">
-              Reward Points to $1 Voucher<br>
-              Redepmtion Rate
-            </h3>
-          </div>
-          <div class="column has-text-centered has-background-primary-light">
-            <h3 class="subtitle is-3">
-              10
-            </h3>
+        <!-- Points To Vouchers Rate row starts -->
+        <div class="column is-8 has-text-centered">
+          <div class="columns is-centered is-multiline">
+            <div class="column is-12 has-text-centered has-background-primary">
+              <h3 class="title is-3 has-text-white">
+                Reward Points to $1 Voucher<br>
+                Redepmtion Rate
+              </h3>
+            </div>
+            <div class="column has-text-centered has-background-primary-light">
+              <h3 class="subtitle is-3">
+                {{.P2VRate}}
+              </h3>
+            </div>
           </div>
         </div>
+        <!-- Points To Vouchers Rate row ends -->
+        <!-- Points row starts -->
+        <div class="column is-8 has-text-centered">
+          {{template "points row" .Points}}
+        </div>
+        <!-- Points row ends -->
         
+        <!-- Coupon Quantum Selection row starts -->
+        <div class="column is-8">
+          {{template "voucher-quantum" .VoucherQuantums}}
+        </div>
+        <!-- Coupon Quantum Selection row ends -->
+        
+        <!-- Button row starts -->
+        <div class="column is-8 has-text-centered">
+          <div class="field">
+            <a href="/users/uid_123456">
+              <div class="button mr-4 is-danger is-medium">Cancel</div>
+            </a>
+            <input type="submit" class="button ml-4 is-primary is-medium" value="Redeemp for Vouchers"/>
+          </div>
+        </div>
+        <!-- Button row ends -->
       </div>
-      <!-- Points To Vouchers Rate row ends -->
-      
-      <!-- Points row starts -->
-      <div class="column is-8 has-text-centered">
-        {{template "points row" .Points}}
-      </div>
-      <!-- Points row ends -->
-      
-      <!-- Coupon Quantum Selection row starts -->
-      <div class="column is-8">
-        {{template "voucher-quantum" .VoucherQuantums}}
-      </div>
-      <!-- Coupon Quantum Selection row ends -->
-      
-      <!-- Button row starts -->
-      <div class="column is-8 has-text-centered"></div>
-      <!-- Button row ends -->
-    </div>
+    </form>
   </div>
 </section>
 {{end}}
