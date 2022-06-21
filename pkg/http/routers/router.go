@@ -42,8 +42,8 @@ func New() *mux.Router {
 }
 
 // RegisterRoutes bind children routes to a parent route.
-func RegisterHandlersWithRouter(router *mux.Router, handlers map[string]func(w http.ResponseWriter, r *http.Request)) {
+// func RegisterHandlersWithRouter(router *mux.Router, handlers map[string]func(w http.ResponseWriter, r *http.Request)) {
 
-	router.HandleFunc("/", handlers["/"]).Methods("POST")
-	router.HandleFunc("/verifytoken", handlers["/verifytoken"]).Methods("GET")
-}
+// 	router.HandleFunc("/", handlers["/"]).Methods("POST")
+// 	router.HandleFunc("/verifytoken", handlers["/verifytoken"]).Methods("GET")
+// }

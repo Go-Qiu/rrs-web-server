@@ -136,12 +136,12 @@ func ServeHtmlUserVouchers(w http.ResponseWriter, r *http.Request) {
 // ServeHtmlUserPointsToVouchers will generate a web page that allows a user to convert his reward points (in hand) to vouchers (quantum and quantity he specify).
 func ServeHtmlUserPointsToVouchers(w http.ResponseWriter, r *http.Request) {
 
-	STATION_CODE := os.Getenv("STATION_CODE")
+	// STATION_CODE := os.Getenv("STATION_CODE")
 
 	files := []string{
 		"./pkg/http/templates/base.tmpl.html",
 		"./pkg/http/templates/header.tmpl.html",
-		"./pkg/http/templates/stations/index.tmpl.html",
+		"./pkg/http/templates/users/points-to-vouchers.tmpl.html",
 	}
 
 	ts, err := template.ParseFiles(files...)
@@ -154,12 +154,26 @@ func ServeHtmlUserPointsToVouchers(w http.ResponseWriter, r *http.Request) {
 
 	// not a 'POST' request.
 	// data to drive the template.
+
+	type pointBlock struct {
+		Name                     string
+		Value                    int
+		NeedAlertBackgroundColor bool
+	}
+
 	tplData := struct {
-		Station string
-		Title   string
+		Title           string
+		Points          []pointBlock
+		VoucherQuantums []string
+		P2VRate         int
 	}{
-		Station: STATION_CODE,
-		Title:   "Web Portal - Points to Vouchers Redepmtion Page",
+		Title: "Web Portal - Points to Vouchers Redepmtion Page",
+		Points: []pointBlock{
+			{Name: "Points Available", Value: 1000, NeedAlertBackgroundColor: false},
+			{Name: "Ponts To Be Used", Value: 0, NeedAlertBackgroundColor: true},
+		},
+		VoucherQuantums: []string{"$1", "$2", "$5", "$10"},
+		P2VRate:         10,
 	}
 
 	ts.ExecuteTemplate(w, "base", tplData)
