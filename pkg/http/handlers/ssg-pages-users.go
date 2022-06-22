@@ -102,7 +102,7 @@ func ServeHtmlUserRecyclableTransactions(w http.ResponseWriter, r *http.Request)
 }
 
 // ServeHtmlUserVouchers will generate a web page that shows all the active vouchers that a specific user has (by default).  It will have an option to list all the vouchers that he has consumed.
-func ServeHtmlUserVouchers(w http.ResponseWriter, r *http.Request) {
+func ServeHtmlUserVouchers1(w http.ResponseWriter, r *http.Request) {
 
 	STATION_CODE := os.Getenv("STATION_CODE")
 
@@ -174,6 +174,70 @@ func ServeHtmlUserPointsToVouchers(w http.ResponseWriter, r *http.Request) {
 		},
 		VoucherQuantums: []string{"$1", "$2", "$5", "$10"},
 		P2VRate:         10,
+	}
+
+	ts.ExecuteTemplate(w, "base", tplData)
+}
+
+func ServeHtmlUserVouchers(w http.ResponseWriter, r *http.Request) {
+
+	// STATION_CODE := os.Getenv("STATION_CODE")
+
+	files := []string{
+		"./pkg/http/templates/base.tmpl.html",
+		"./pkg/http/templates/header.tmpl.html",
+		"./pkg/http/templates/users/vouchers.tmpl.html",
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		// app.errorLog.Println(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		// app.serverError(w, err)
+		return
+	}
+
+	// not a 'POST' request.
+	// data to drive the template.
+
+	type block struct {
+		Name                     string
+		Value                    int
+		NeedAlertBackgroundColor bool
+	}
+
+	type voucher struct {
+		ID      string
+		Quantum string
+	}
+
+	tplData := struct {
+		Title    string
+		Blks     []block
+		Vouchers []voucher
+	}{
+		Title: "Vouchers Wallet Page",
+		Blks: []block{
+			{Name: "Vouchers Amount", Value: 35, NeedAlertBackgroundColor: false},
+			{Name: "To Be Used Amount", Value: 0, NeedAlertBackgroundColor: true},
+		},
+		Vouchers: []voucher{
+			{ID: "vid_654321", Quantum: "$1"},
+			{ID: "vid_643217", Quantum: "$1"},
+			{ID: "vid_654328", Quantum: "$1"},
+			{ID: "vid_654329", Quantum: "$1"},
+			{ID: "vid_654330", Quantum: "$1"},
+
+			{ID: "vid_654421", Quantum: "$2"},
+			{ID: "vid_654422", Quantum: "$2"},
+			{ID: "vid_654423", Quantum: "$2"},
+			{ID: "vid_654424", Quantum: "$2"},
+			{ID: "vid_654425", Quantum: "$2"},
+
+			{ID: "vid_654521", Quantum: "$5"},
+			{ID: "vid_654422", Quantum: "$5"},
+			{ID: "vid_654521", Quantum: "$10"},
+		},
 	}
 
 	ts.ExecuteTemplate(w, "base", tplData)
