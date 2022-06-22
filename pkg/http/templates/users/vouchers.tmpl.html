@@ -1,0 +1,167 @@
+{{define "title"}}
+  {{.Title}} - Recycle & Rewards System
+{{end}}
+
+{{define "main"}}
+<section class="section">
+  <div class="container">
+    <form action="" method="POST">
+
+      <div class="columns is-centered is-multiline">
+        <!-- vouchers stats starts -->
+        <div class="column is-8 has-text-centered">
+          {{/*template "stats row" .Blks*/}}
+        </div>
+        <!-- vouchers stats ends -->
+        
+        <!-- vouchers block starts -->
+        <div class="column is-8 has-text-centered">
+          {{/*template "vouchers block" .Vouchers*/}}
+          
+        </div>
+        <!-- vouchers block ends -->
+        
+        <!-- buttons row starts -->
+        <div class="column is-8 has-text-centered">
+
+          <div class="field">
+            <a href="/users/uid_123456">
+              <div class="button mr-4 is-danger is-medium">Cancel</div>
+            </a>
+            <input type="submit" class="button ml-4 is-primary is-medium" value="USE"/>
+          </div>
+
+        </div>
+        <!-- buttons row ends -->
+      </div>
+
+    </form>
+  </div>
+</section>
+{{end}}
+
+
+{{define "stats row"}}
+<div class="columns is-centered">
+  
+  {{ range $index, $element := .}}
+  
+  <div class="column has-text-centered">
+    {{template "stats" $element}}
+  </div>
+  
+  {{end}}
+
+</div>
+{{end}}
+
+
+{{define "stats"}}
+<div class="columns is-centered is-multiline">
+  <div class="column is-8 has-text-centered">
+    
+    {{if .NeedAlertBackgroundColor}}
+    
+    <article class="panel is-danger">
+      <p class="panel-heading">
+        {{.Name}}
+      </p>
+      <div class="panel-block has-background-danger-light">
+        <div class="control">
+          <h3 class="title is-3">
+            {{.Value}}
+          </h3>
+        </div>
+      </div>  
+    </article>
+
+    {{else}}
+    
+    <article class="panel is-primary">
+      <p class="panel-heading">
+        {{.Name}}
+      </p>
+      <div class="panel-block has-background-primary-light">
+        <div class="control">
+          <h3 class="title is-3">
+            {{.Value}}
+          </h3>
+        </div>
+      </div>  
+    </article>
+    
+    {{end}}
+  </div>
+  
+</div>
+{{end}}
+
+
+{{define "vouchers block"}}
+<div class="columns is-centered">
+
+  {{ range $index, $element := .}}
+  <div class="column-12">
+    {{template "voucher" $element}}
+  </div>
+  {{ end }}
+
+</div>
+
+{{end}}
+
+
+{{define "vouchers block2"}}
+
+{{ range $index, $element := .}}
+{{ template "voucher2"}}
+{{ end }}
+
+{{end}
+
+
+{{define "voucher"}}
+<div class="columns is-centered is-multiline">
+  <div class="column is-12 has-text-centered">
+    <div class="title is-5">
+      {{.Quantum}}
+    </div>
+    
+  </div>
+  <div class="column is-12 has-text-centered">
+    <p>{{.ID}}</p>
+  </div>
+  <div class="column is-12 has-text-centered">
+    <div class="field">
+      <div class="control">
+        <input type="checkbox" class="checkbox">
+      </div>
+      
+    </div>
+  </div>
+</div>
+{{end}}
+
+{{define "voucher2"}}
+<div class="columns is-centered">
+  <div class="column is-12 has-text-centered">
+    
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          {{.Quantum}}
+        </div>
+      </div>
+      <div class="card-content">
+        <p>{{.ID}}</p>
+      </div>
+      <div class="card-footer">
+        <div class="card-footer-item">
+          <div class="control">
+            <input type="checkbox" class="checkbox">
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+{{end}}
