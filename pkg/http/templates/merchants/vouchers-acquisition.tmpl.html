@@ -1,0 +1,111 @@
+{{define "title"}}
+{{ .Title}} - Recycle & Rewards System
+{{end}}
+
+{{define "main"}}
+<section class="section">
+  <div class="container">
+    
+    <form action="" method="POST">
+      <div class="columns is-centered is-multiline">
+        <!-- stats row starts-->
+        <div class="column is-8 has-text-centered">
+          {{template "stats row" .Blocks}}
+        </div>
+        <!-- stats row ends -->
+        
+        <!-- buttons row starts -->
+        <div class="column is-8 has-text-centered">
+          <div class="field">
+            <a href="/users/uid_123456">
+              <div class="button mr-4 is-danger is-medium">Cancel</div>
+            </a>
+            <input type="submit" class="button ml-4 is-primary is-medium" value="Submit"/>
+          </div>
+        </div>
+        <!-- buttons row ends -->
+        
+      </div>
+  </form>
+  </div>
+</section>
+{{end}}
+
+
+{{define "stats row"}}
+<div class="columns is-centered">
+  
+  {{ range $index, $element := .}}
+  
+  <div class="column has-text-centered">
+    {{template "stats" $element}}
+  </div>
+  
+  {{end}}
+
+</div>
+{{end}}
+
+
+{{define "stats"}}
+<div class="columns is-centered is-multiline">
+  <div class="column is-8 has-text-centered">
+    
+    {{if .NeedAlertBackgroundColor}}
+    
+    <article class="panel is-danger">
+      <div class="panel-heading">
+        
+        <div class="columns">
+          <div class="column is-12">
+            {{.Name}}
+          </div>
+        </div>
+        
+      </div>
+      <div class="panel-block has-background-danger-light">
+        <div class="control">
+          <h3 class="title is-3">
+            $ 0<br>
+            <br>
+          </h3>
+        </div>
+      </div>  
+    </article>
+
+    {{else}}
+    
+    <article class="panel is-primary">
+      <div class="panel-heading">
+        
+        <div class="columns">
+          
+          <div class="column is-9">
+            {{.Name}}
+          </div>
+          
+          <div class="column">
+            
+              <div>
+                <i class="fa-solid fa-circle-plus fa-2x"></i>
+              </div>
+            
+          </div>
+        </div>
+
+      </div>
+      <div class="panel-block has-background-primary-light">
+        <div class="control">
+          <h3 class="title is-3">
+            <br>
+            <br>
+          </h3>
+        </div>
+      </div>  
+    </article>
+    
+    {{end}}
+  </div>
+  
+</div>
+{{end}}

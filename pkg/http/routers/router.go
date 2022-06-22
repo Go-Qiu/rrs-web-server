@@ -32,7 +32,7 @@ func New() *mux.Router {
 
 	// merchants routes
 	r.HandleFunc("/merchants", handlers.ServeHtmlIndexMerchants)
-	r.HandleFunc("/merchants/{id}/vouchers/aquired", handlers.ServeHtmlMerchantVouchersAquired)
+	r.HandleFunc("/merchants/{id}/vouchers/aquire", handlers.ServeHtmlMerchantVouchersAquisition)
 	r.HandleFunc("/merchants/{id}/vouchers/capture", handlers.ServeHtmlMerchantVoucherCapture)
 
 	// static web pages or assets router

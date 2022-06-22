@@ -6,14 +6,12 @@ import (
 	"os"
 )
 
-func ServeHtmlMerchantVouchersAquired(w http.ResponseWriter, r *http.Request) {
-
-	STATION_CODE := os.Getenv("STATION_CODE")
+func ServeHtmlMerchantVouchersAquisition(w http.ResponseWriter, r *http.Request) {
 
 	files := []string{
 		"./pkg/http/templates/base.tmpl.html",
 		"./pkg/http/templates/header.tmpl.html",
-		"./pkg/http/templates/stations/index.tmpl.html",
+		"./pkg/http/templates/merchants/vouchers-acquisition.tmpl.html",
 	}
 
 	ts, err := template.ParseFiles(files...)
@@ -26,12 +24,22 @@ func ServeHtmlMerchantVouchersAquired(w http.ResponseWriter, r *http.Request) {
 
 	// not a 'POST' request.
 	// data to drive the template.
+
+	type block struct {
+		Name                     string
+		Value                    string
+		NeedAlertBackgroundColor bool
+	}
+
 	tplData := struct {
-		Station string
-		Title   string
+		Title  string
+		Blocks []block
 	}{
-		Station: STATION_CODE,
-		Title:   "Web Portal - Merchant Acquire Vouchers Page",
+		Title: "Merchant Vouchers Acquisition Page",
+		Blocks: []block{
+			{Name: "Vouchers", Value: "", NeedAlertBackgroundColor: false},
+			{Name: "Amount", Value: "", NeedAlertBackgroundColor: true},
+		},
 	}
 
 	ts.ExecuteTemplate(w, "base", tplData)
