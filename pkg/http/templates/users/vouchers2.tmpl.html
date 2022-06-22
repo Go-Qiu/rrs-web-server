@@ -94,8 +94,8 @@
 <div class="columns is-centered">
   
     {{ range $index, $element := .}}
-    <div class="column">
-      {{template "voucher" $element}}
+    <div class="column has-text-centered">
+      {{template "voucher2" $element}}
     </div>
     {{ end }}
   
@@ -114,5 +114,30 @@
       <p>{{.ID}}</p>
     </div>
   </div>
+</div>
+{{end}}
+
+
+{{define "voucher2"}}
+<div class="card">
+  
+  <header class="card-header">
+    <p class="card-header-title">{{.Quantum}}</p>
+  </header>
+  <div class="card-content">
+    <div class="content">
+      {{.ID}}
+    </div>
+  </div>
+  <div class="card-footer">
+    <div class="card-footer-item">
+      <div class="field">
+        <div class="control">
+          <input type="checkbox">
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 {{end}}
