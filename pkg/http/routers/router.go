@@ -2,6 +2,7 @@ package routers
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/go-qiu/rrs-web-server/pkg/http/handlers"
 	"github.com/gorilla/mux"
@@ -12,51 +13,37 @@ func New() *mux.Router {
 
 	// instantiate a gorilla/mux reouter.
 	r := mux.NewRouter()
+	PUBLIC := os.Getenv("PUBLIC")
 
-	// register all the defined routes.
-	// parentGeneric := r.PathPrefix("/api/v1").Subrouter()
-
-	// authentication routes
-	// handlers := make(map[string]func(w http.ResponseWriter, r *http.Request))
-	// handlers["/"] = Auth
-	// handlers["/verifytoken"] = VerifyToken
-
-	// RegisterHandlersWithRouter(parentGeneric, handlers)
-
-	// login
 	r.HandleFunc("/", handlers.ServeHtmlIndex)
-	// r.HandleFunc("/login", handlers.ServeHtmlLogin)
+	r.HandleFunc("/login", handlers.ServeHtmlLogin)
+	r.HandleFunc("/logout", handlers.ServeHtmlLogout)
 
 	// users routes
 	r.HandleFunc("/users", handlers.ServeHtmlIndexUsers)
+	r.HandleFunc("/users/registration", handlers.ServeHtmlLogin)
+	r.HandleFunc("/users/{id}", handlers.ServeHtmlUserProfile)
+	r.HandleFunc("/users/{id}/transactions", handlers.ServeHtmlUserRecyclableTransactions)
+	r.HandleFunc("/users/{id}/vouchers", handlers.ServeHtmlUserVouchers)
+	r.HandleFunc("/users/{id}/points_to_vouchers/redepmtion", handlers.ServeHtmlUserPointsToVouchers)
 
 	// vouchers routes
 	r.HandleFunc("/vouchers", handlers.ServeHtmlIndexVouchers)
 
-	// r.HandleFunc("/vouchers/sponsors/", h)
-
 	// merchants routes
 	r.HandleFunc("/merchants", handlers.ServeHtmlIndexMerchants)
+	r.HandleFunc("/merchants/{id}/vouchers/aquire", handlers.ServeHtmlMerchantVouchersAquisition)
+	r.HandleFunc("/merchants/{id}/vouchers/capture", handlers.ServeHtmlMerchantVoucherCapture)
 
-	// station routes
-	// stationRoutes := generic.PathPrefix("/station").Subrouter()
-	// stationRoutes.HandleFunc("/", handlers.ServerHtmlStationIndex)
-	// stationRoutes.HandleFunc("/dropoff", handlers.ServerHtmlStationDropOff)
-
+	// static web pages or assets router
+	fp := http.FileServer(http.Dir(PUBLIC))
+	r.PathPrefix("/public").Handler(http.StripPrefix("/public/", fp))
 	return r
 }
 
 // RegisterRoutes bind children routes to a parent route.
-func RegisterHandlersWithRouter(router *mux.Router, handlers map[string]func(w http.ResponseWriter, r *http.Request)) {
+// func RegisterHandlersWithRouter(router *mux.Router, handlers map[string]func(w http.ResponseWriter, r *http.Request)) {
 
-	router.HandleFunc("/", handlers["/"]).Methods("POST")
-	router.HandleFunc("/verifytoken", handlers["/verifytoken"]).Methods("GET")
-}
-
-func Auth(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func VerifyToken(w http.ResponseWriter, r *http.Request) {
-
-}
+// 	router.HandleFunc("/", handlers["/"]).Methods("POST")
+// 	router.HandleFunc("/verifytoken", handlers["/verifytoken"]).Methods("GET")
+// }

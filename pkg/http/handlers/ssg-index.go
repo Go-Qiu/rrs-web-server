@@ -20,7 +20,7 @@ func ServeHtmlIndex(w http.ResponseWriter, r *http.Request) {
 
 	files := []string{
 		"./pkg/http/templates/base.tmpl.html",
-		"./pkg/http/templates/stations/header.tmpl.html",
+		"./pkg/http/templates/header.tmpl.html",
 		"./pkg/http/templates/stations/index.tmpl.html",
 	}
 
@@ -58,7 +58,7 @@ func ServeHtmlIndexUsers(w http.ResponseWriter, r *http.Request) {
 
 	files := []string{
 		"./pkg/http/templates/base.tmpl.html",
-		"./pkg/http/templates/stations/header.tmpl.html",
+		"./pkg/http/templates/header.tmpl.html",
 		"./pkg/http/templates/stations/index.tmpl.html",
 	}
 
@@ -96,7 +96,7 @@ func ServeHtmlIndexVouchers(w http.ResponseWriter, r *http.Request) {
 
 	files := []string{
 		"./pkg/http/templates/base.tmpl.html",
-		"./pkg/http/templates/stations/header.tmpl.html",
+		"./pkg/http/templates/header.tmpl.html",
 		"./pkg/http/templates/stations/index.tmpl.html",
 	}
 
@@ -134,7 +134,7 @@ func ServeHtmlIndexMerchants(w http.ResponseWriter, r *http.Request) {
 
 	files := []string{
 		"./pkg/http/templates/base.tmpl.html",
-		"./pkg/http/templates/stations/header.tmpl.html",
+		"./pkg/http/templates/header.tmpl.html",
 		"./pkg/http/templates/stations/index.tmpl.html",
 	}
 

@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 )
 
 func ServeHtml(w http.ResponseWriter, r *http.Request) {
@@ -24,12 +23,12 @@ func ServeHtml(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// request for home page.
-	if r.URL.Path == "/" {
-		ServeHtmlIndex(w, r)
-		return
-	}
+	// if r.URL.Path == "/" {
+	// 	ServeHtmlIndex(w, r)
+	// 	return
+	// }
 
 	// serve the html page
-	fp := filepath.Join(PUBLIC, filepath.Clean(r.URL.Path))
-	http.ServeFile(w, r, fp)
+	// fp := filepath.Join(PUBLIC, filepath.Clean(r.URL.Path))
+	http.ServeFile(w, r, PUBLIC)
 }
