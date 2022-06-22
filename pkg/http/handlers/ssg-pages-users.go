@@ -186,7 +186,7 @@ func ServeHtmlUserVouchers(w http.ResponseWriter, r *http.Request) {
 	files := []string{
 		"./pkg/http/templates/base.tmpl.html",
 		"./pkg/http/templates/header.tmpl.html",
-		"./pkg/http/templates/users/vouchers2.tmpl.html",
+		"./pkg/http/templates/users/vouchers.tmpl.html",
 	}
 
 	ts, err := template.ParseFiles(files...)
