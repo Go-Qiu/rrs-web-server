@@ -6,9 +6,18 @@ import (
 	"net/http"
 )
 
+// JWTConfig is a struct for storing the JWT configuration settings.
+type JWTConfig struct {
+	ISSUER     string
+	EXP_MIN    string
+	SECRET_KEY string
+}
+
+// AuthCtl is a struct that represents an authentication controller.
 type AuthCtl struct {
-	name   string
-	apikey string
+	name      string
+	apikey    string
+	jwtConfig *JWTConfig
 }
 
 var (
@@ -22,16 +31,45 @@ var (
 // NewAuthCtl sets:
 // - the apikey to use to connect to SingPass API Service
 // - the name assigned to this struct (for reference purpose)
-func NewAuthCtl(name string, apikey string) *AuthCtl {
+func NewAuthCtl(name string, apikey string, jwtConfig *JWTConfig) *AuthCtl {
 	return &AuthCtl{
-		name:   name,
-		apikey: apikey,
+		name:      name,
+		apikey:    apikey,
+		jwtConfig: jwtConfig,
 	}
 }
 
 // Auth executes the authentication flow using SingPass API Service.
 func (a *AuthCtl) Auth(w http.ResponseWriter, r *http.Request) {
+
 	w.Header().Set("Content-Type", "application/json")
+
+	// set the jwt issuer value
+	// JWT_ISSUER := a.jwtConfig.ISSUER
+
+	// set the jwt expiry time lapse (in minutes)
+	// JWT_EXP_MINUTES, err := strconv.Atoi(a.jwtConfig.EXP_MIN)
+	// if err != nil {
+	// 	customErr := errors.New(`[AUTH-CTL] fail to set jwt expiry time frame`)
+	// 	utils.SendErrorMsgToClient(&w, customErr)
+	// 	return
+	// }
+
+	// auth code here.
+
+	// ok.
+	// generate JWT.
+
+	// exp := time.Now().Add(time.Minute * time.Duration(JWT_EXP_MINUTES)).UnixMilli()
+	// pl := utils.JWTPayload{
+	// 	Id:        found.Email,
+	// 	NameFirst: found.NameFirst,
+	// 	NameLast:  found.NameLast,
+	// 	IsAgent:   found.IsAgent,
+	// 	IsActive:  found.IsActive,
+	// 	Iss:       JWT_ISSUER,
+	// 	Exp:       exp,
+	// }
 
 	// to-do:
 	// get jwt from SingPass (to be coded further)
