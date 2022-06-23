@@ -1,5 +1,5 @@
 // code for the data store implementation
-package data
+package ds
 
 import (
 	"errors"

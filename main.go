@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-qiu/rrs-web-server/pkg/application"
 	"github.com/go-qiu/rrs-web-server/pkg/controllers"
+	"github.com/go-qiu/rrs-web-server/pkg/ds"
 	"github.com/go-qiu/rrs-web-server/pkg/http/routers"
 	"github.com/joho/godotenv"
 )
@@ -22,13 +23,32 @@ func main() {
 		log.Fatal(errString)
 	}
 	SERVER_ADDR := os.Getenv("SERVER_ADDR")
+	// API_KEY_USERS := os.Getenv("API_KEY_USERS")
+	// API_KEY_VOUCHERS := os.Getenv("API_KEY_VOUCHERS")
+	// API_KEY_MERCHANTS := os.Getenv("API_KEY_MERCHANTS")
 
 	// set the custom router.
 	router := routers.New()
 
-	// instantiate a controllers.
-	authCtl := controllers.NewAuthCtl("Auth-SingPass", "Singpass-key")
+	jwtConfig := controllers.JWTConfig{
+		ISSUER:     os.Getenv("JWT_ISSUER"),
+		EXP_MIN:    os.Getenv("JWT_EXP_MINUTES"),
+		SECRET_KEY: os.Getenv("JWT_SECRET_KEY"),
+	}
 
+	// instantiate an in-memory data store, to cache the Users data points.
+	var dsUsers ds.DataStore = *ds.New()
+
+	// populate the users in-memory data store, using the users data from users microservice.
+
+	// instantiate a authentication controller.
+	authCtl := controllers.NewAuthCtl("JWT AUTH SERVICE", "", &jwtConfig, &dsUsers)
+
+	// instantiate a voucher controller.
+
+	// instantiate a merchant controller.
+
+	// instantiate an application to link the respective controllers and router.
 	app := application.New()
 	app.Controllers.Auth = authCtl
 	app.Router = router

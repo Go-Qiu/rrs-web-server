@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/go-qiu/rrs-web-server/pkg/ds"
 )
 
 // JWTConfig is a struct for storing the JWT configuration settings.
@@ -18,6 +20,7 @@ type AuthCtl struct {
 	name      string
 	apikey    string
 	jwtConfig *JWTConfig
+	dataStore *ds.DataStore
 }
 
 var (
@@ -31,11 +34,12 @@ var (
 // NewAuthCtl sets:
 // - the apikey to use to connect to SingPass API Service
 // - the name assigned to this struct (for reference purpose)
-func NewAuthCtl(name string, apikey string, jwtConfig *JWTConfig) *AuthCtl {
+func NewAuthCtl(name string, apikey string, jwtConfig *JWTConfig, ds *ds.DataStore) *AuthCtl {
 	return &AuthCtl{
 		name:      name,
 		apikey:    apikey,
 		jwtConfig: jwtConfig,
+		dataStore: ds,
 	}
 }
 
