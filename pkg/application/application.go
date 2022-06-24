@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/go-qiu/rrs-web-server/pkg/controllers"
 	"github.com/go-qiu/rrs-web-server/pkg/http/handlers"
@@ -94,24 +95,12 @@ func (a *Application) PullDataIntoDataStore() {
 		LastLogin string
 	}
 
-	// respBody is a struct for use to unmarshal a json.
+	// respBody struct for unmarshalling response body json.
 	type respBody struct {
 		Ok   bool                   `json:"ok"`
 		Msg  string                 `json:"msg"`
 		Data map[string]interface{} `json:"data"`
 	}
-
-	// dataPoint struct to facilitate user data point capturing.
-	// type DataPoint struct {
-	// 	data struct {
-	// 		UserID    int
-	// 		Phone     string
-	// 		Name      string
-	// 		Password  string
-	// 		Points    int
-	// 		LastLogin string
-	// 	}
-	// }
 
 	// http client to connect to users microservice.
 	// setup the client to bypass the ssl verification check so that a call to users microservice (via https, protected by self-signed ssl cert) can be done.
@@ -121,80 +110,105 @@ func (a *Application) PullDataIntoDataStore() {
 		},
 	}
 
+	// get environment variables for connecting to user microservice.
 	API_ROOT_URL := os.Getenv("API_URL_USERS")
 	API_KEY := os.Getenv("API_KEY_USERS")
 	API_USERNAME := os.Getenv("API_USERNAME_USERS")
 
-	endpoint := fmt.Sprintf(`%s/getusers?page_index=0&records_per_page=10`, API_ROOT_URL)
-	apiReq, err := http.NewRequest("GET", endpoint, nil)
+	DATA_PTS_PER_PAGE, err := strconv.Atoi(os.Getenv("DATA_PTS_PER_PAGE"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// set all the required request header attributes.
-	apiReq.Header.Set("Content-Type", "application/json")
-	apiReq.Header.Set("apiKey", API_KEY)
-	apiReq.Header.Set("username", API_USERNAME)
+	// loop to request for all users data (by page index)
+	pageIndex := 0
+	dataPtsCount := 0
+	isOk := false
 
-	// send out the request.
-	outcome, err := client.Do(apiReq)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// handle the response body.
-	defer outcome.Body.Close()
-	body, err := ioutil.ReadAll(outcome.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// unmarshal response body json to struct.
-	var rb respBody
-	err = json.Unmarshal(body, &rb)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	// slice to cache the all the users data points retrieved from users microservice.
 	dataPoints := []dataPoint{}
-	// loop through the data maps returned.
-	for _, data := range rb.Data {
 
-		// break down the first level map.
+	for (pageIndex == 0) || (isOk && dataPtsCount == DATA_PTS_PER_PAGE) {
+		// execute while above condition is true
 
-		dp := dataPoint{}
+		// set the endpoint query string
+		endpoint := fmt.Sprintf(`%s/getusers?page_index=%d&records_per_page=%d`, API_ROOT_URL, pageIndex, DATA_PTS_PER_PAGE)
 
-		// loop through the second level map.
-		// get the attribute and its value.
-		// build the user data point struct.
-		for k, v := range data.(map[string]interface{}) {
+		// prepare the GET request.
+		apiReq, err := http.NewRequest("GET", endpoint, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-			// dp := element2.(dataPoint)
-			fmt.Printf("attribute : %s\n", k)
-			fmt.Println("value: ", v)
-			switch k {
-			case "UserID":
-				dp.UserID = v.(float64)
-			case "Phone":
-				dp.Phone = v.(string)
-			case "Name":
-				dp.Name = v.(string)
-			case "Password":
-				dp.Password = v.(string)
-			case "Points":
-				dp.Points = v.(float64)
-			case "LastLogin":
-				dp.LastLogin = v.(string)
+		// set all the required header attributes of this GET request.
+		apiReq.Header.Set("Content-Type", "application/json")
+		apiReq.Header.Set("apiKey", API_KEY)
+		apiReq.Header.Set("username", API_USERNAME)
+
+		// send out the request.
+		outcome, err := client.Do(apiReq)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// handle the response body.
+		defer outcome.Body.Close()
+		body, err := ioutil.ReadAll(outcome.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// unmarshal response body json to struct.
+		var rb respBody
+		err = json.Unmarshal(body, &rb)
+		if err != nil {
+			log.Fatal(err)
+		}
+		isOk = rb.Ok
+
+		// reset the data points count (for page index)
+		dataPtsCount = 0
+
+		// loop through the data maps returned.
+		for _, data := range rb.Data {
+
+			// break down the first level map.
+
+			dp := dataPoint{}
+
+			// loop through the second level map.
+			// get the attribute and its value.
+			// build the user data point struct.
+			for k, v := range data.(map[string]interface{}) {
+
+				switch k {
+				case "UserID":
+					dp.UserID = v.(float64)
+				case "Phone":
+					dp.Phone = v.(string)
+				case "Name":
+					dp.Name = v.(string)
+				case "Password":
+					dp.Password = v.(string)
+				case "Points":
+					dp.Points = v.(float64)
+				case "LastLogin":
+					dp.LastLogin = v.(string)
+				}
+				//
 			}
+			dataPoints = append(dataPoints, dp)
+
+			// check the number of data points received in the current page index.
+			dataPtsCount++
 			//
 		}
-		dataPoints = append(dataPoints, dp)
-		//
+
+		// increment the page index count
+		pageIndex++
 	}
 
-	fmt.Println(dataPoints)
-
 	// add into in-memory data store.
-
+	fmt.Println(dataPoints)
 	//
 }
