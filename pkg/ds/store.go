@@ -25,7 +25,7 @@ func New() *DataStore {
 	return &DataStore{avl: avl.New()}
 }
 
-func (ds *DataStore) InsertNode(item models.User, id string) error {
+func (ds *DataStore) InsertNode(item interface{}, id string) error {
 
 	err := ds.avl.InsertNode(item, id)
 	if err != nil {

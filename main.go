@@ -38,20 +38,22 @@ func main() {
 	// instantiate an in-memory data store, to cache the Users data points.
 	var dsUsers ds.DataStore = *ds.New()
 
+	// instantiate an application to link the respective controllers and router.
+	app := application.New()
+	app.DataStore = &dsUsers
+
+	// populate the users in-memory data store, using the users data from users microservice.
+	app.PullDataIntoDataStore()
+
 	// instantiate a authentication controller.
 	authCtl := controllers.NewAuthCtl("JWT AUTH SERVICE", "", &jwtConfig, &dsUsers)
+	app.Controllers.Auth = authCtl
 
 	// instantiate a voucher controller.
 
 	// instantiate a merchant controller.
 
-	// instantiate an application to link the respective controllers and router.
-	app := application.New()
-	app.Controllers.Auth = authCtl
 	// app.Router = router
-
-	// populate the users in-memory data store, using the users data from users microservice.
-	app.PullDataIntoDataStore()
 
 	// instantiate a custom http server.
 	srv := http.Server{

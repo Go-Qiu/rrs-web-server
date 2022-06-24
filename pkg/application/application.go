@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/go-qiu/rrs-web-server/pkg/controllers"
+	"github.com/go-qiu/rrs-web-server/pkg/ds"
 	"github.com/go-qiu/rrs-web-server/pkg/http/handlers"
 	"github.com/go-qiu/rrs-web-server/pkg/http/routers"
 
@@ -33,6 +34,7 @@ type AppCRUDControllers struct {
 // Application struct
 type Application struct {
 	Controllers AppControllers
+	DataStore   *ds.DataStore
 	// Router      *mux.Router
 }
 
@@ -86,6 +88,7 @@ func (a *Application) PullDataIntoDataStore() {
 	// exception handling (exit fast)
 
 	// ok.
+	// dataPoint is a struct to hold a user data point returned by the users microservice.
 	type dataPoint struct {
 		UserID    float64
 		Phone     string
@@ -95,7 +98,7 @@ func (a *Application) PullDataIntoDataStore() {
 		LastLogin string
 	}
 
-	// respBody struct for unmarshalling response body json.
+	// respBody struct for unmarshalling response body json returned by the users microservice.
 	type respBody struct {
 		Ok   bool                   `json:"ok"`
 		Msg  string                 `json:"msg"`
@@ -210,6 +213,11 @@ func (a *Application) PullDataIntoDataStore() {
 	}
 
 	// add into in-memory data store.
-	fmt.Println(dataPoints)
+	for _, dp := range dataPoints {
+		err := a.DataStore.InsertNode(dp, dp.Phone)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	//
 }
