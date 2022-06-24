@@ -128,6 +128,7 @@ func (a *Application) PullDataIntoDataStore() {
 	// slice to cache the all the users data points retrieved from users microservice.
 	dataPoints := []dataPoint{}
 
+	// !!!! code within this loop could potentially be made to retrieve all data points concurrently from the microservice.
 	for (pageIndex == 0) || (isOk && dataPtsCount == DATA_PTS_PER_PAGE) {
 		// execute while above condition is true
 
