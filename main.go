@@ -8,7 +8,6 @@ import (
 	"github.com/go-qiu/rrs-web-server/pkg/application"
 	"github.com/go-qiu/rrs-web-server/pkg/controllers"
 	"github.com/go-qiu/rrs-web-server/pkg/ds"
-	"github.com/go-qiu/rrs-web-server/pkg/http/routers"
 	"github.com/joho/godotenv"
 )
 
@@ -28,7 +27,7 @@ func main() {
 	// API_KEY_MERCHANTS := os.Getenv("API_KEY_MERCHANTS")
 
 	// set the custom router.
-	router := routers.New()
+	// router := routers.New()
 
 	jwtConfig := controllers.JWTConfig{
 		ISSUER:     os.Getenv("JWT_ISSUER"),
@@ -38,8 +37,6 @@ func main() {
 
 	// instantiate an in-memory data store, to cache the Users data points.
 	var dsUsers ds.DataStore = *ds.New()
-
-	// populate the users in-memory data store, using the users data from users microservice.
 
 	// instantiate a authentication controller.
 	authCtl := controllers.NewAuthCtl("JWT AUTH SERVICE", "", &jwtConfig, &dsUsers)
@@ -51,12 +48,15 @@ func main() {
 	// instantiate an application to link the respective controllers and router.
 	app := application.New()
 	app.Controllers.Auth = authCtl
-	app.Router = router
+	// app.Router = router
+
+	// populate the users in-memory data store, using the users data from users microservice.
+	app.PullDataIntoDataStore()
 
 	// instantiate a custom http server.
 	srv := http.Server{
 		Addr:    SERVER_ADDR,
-		Handler: app.Router,
+		Handler: app.Router(),
 	}
 
 	// start http server.
