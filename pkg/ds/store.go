@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/go-qiu/rrs-web-server/pkg/ds/avl"
-	"github.com/go-qiu/rrs-web-server/pkg/ds/models"
 	"github.com/go-qiu/rrs-web-server/pkg/ds/stack"
 )
 
@@ -85,7 +84,7 @@ func (ds *DataStore) Update(id string, updated interface{}) (interface{}, error)
 
 	u, err := ds.avl.Update(id, updated)
 	if err != nil {
-		return models.User{}, err
+		return nil, err
 	}
 
 	return u.GetItem(), nil

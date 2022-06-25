@@ -219,5 +219,11 @@ func (a *Application) PullDataIntoDataStore() {
 			log.Fatal(err)
 		}
 	}
+
+	// accounts := stack.New()
+	// err = a.DataStore.ListAllNodes(&accounts, false)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 	//
 }

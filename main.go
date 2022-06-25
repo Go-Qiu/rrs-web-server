@@ -42,11 +42,11 @@ func main() {
 	app := application.New()
 	app.DataStore = &dsUsers
 
-	// populate the users in-memory data store, using the users data from users microservice.
+	// populate the users in-memory cache, using the users data from users microservice.
 	app.PullDataIntoDataStore()
 
 	// instantiate a authentication controller.
-	authCtl := controllers.NewAuthCtl("JWT AUTH SERVICE", "", &jwtConfig, &dsUsers)
+	authCtl := controllers.NewAuthCtl("JWT AUTH SERVICE", "", &jwtConfig, nil)
 	app.Controllers.Auth = authCtl
 
 	// instantiate a voucher controller.
