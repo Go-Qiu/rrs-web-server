@@ -30,6 +30,25 @@ func ParseBody(r *http.Request, x interface{}) error {
 	return nil
 }
 
+func ParseResponseBody(r *http.Response, x interface{}) error {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		// exception handling code here
+		return err
+	}
+	defer r.Body.Close()
+
+	// ok. parse json to struct.
+	err = json.Unmarshal([]byte(body), x)
+	if err != nil {
+		// exception handling code here
+		return err
+	}
+
+	// ok.
+	return nil
+}
+
 // GetRandomNumber returns a random number.
 func GetRandomNumber() int {
 
@@ -89,6 +108,17 @@ func AreAllowedCharacters(v string) bool {
 //   * "data" attribute set to {}
 func SendErrorMsgToClient(w *http.ResponseWriter, err error) {
 	(*w).WriteHeader(http.StatusInternalServerError)
+	body := fmt.Sprintf(`{
+			"ok" : false,
+			"msg" : "%s",
+			"data" : {}
+		}`, err.Error())
+	(*w).Write([]byte(body))
+	//
+}
+
+func SendConflictMsgToClient(w *http.ResponseWriter, err error) {
+	(*w).WriteHeader(http.StatusConflict)
 	body := fmt.Sprintf(`{
 			"ok" : false,
 			"msg" : "%s",
