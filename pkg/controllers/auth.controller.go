@@ -142,12 +142,12 @@ func (a *AuthCtl) Auth(w http.ResponseWriter, r *http.Request) {
 		"ok": true,
 		"msg": "[AUTH-CTL]: authentication ok",
 		"data": {
+			"id" : %d,
 			"token": "%s",
 			"name" : "%s",
-			"id" : "%d",
 			"phone" : "%s"
 		}
-	}`, token, dataPt.Name, int64(dataPt.UserID), dataPt.Phone)
+	}`, int64(dataPt.UserID), token, dataPt.Name, dataPt.Phone)
 
 	// send response to the requesting device
 	w.WriteHeader(http.StatusOK)
