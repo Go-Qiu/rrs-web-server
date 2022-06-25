@@ -14,14 +14,22 @@ import (
 )
 
 // JWTPayload is the struct for holding the data used in generating the second segment of the JWT string.
+// type JWTPayload struct {
+// 	Id        string `json:"id"`
+// 	NameFirst string `json:"nameFirst"`
+// 	NameLast  string `json:"nameLast"`
+// 	IsAgent   bool   `json:"isAgent"`
+// 	IsActive  bool   `json:"isActive"`
+// 	Iss       string `json:"iss"`
+// 	Exp       int64  `json:"exp"`
+// }
+
 type JWTPayload struct {
-	Id        string `json:"id"`
-	NameFirst string `json:"nameFirst"`
-	NameLast  string `json:"nameLast"`
-	IsAgent   bool   `json:"isAgent"`
-	IsActive  bool   `json:"isActive"`
-	Iss       string `json:"iss"`
-	Exp       int64  `json:"exp"`
+	Id    float64 `json:"id"`
+	Name  string  `json:"name"`
+	Phone string  `json:"phone"`
+	Iss   string  `json:"iss"`
+	Exp   int64   `json:"exp"`
 }
 
 // JWTHeader is the struct for holding the data used in generating the first segment of the JWT string.

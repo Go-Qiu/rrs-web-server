@@ -11,7 +11,6 @@ import (
 	"strconv"
 
 	"github.com/go-qiu/rrs-web-server/pkg/controllers"
-	"github.com/go-qiu/rrs-web-server/pkg/ds"
 	"github.com/go-qiu/rrs-web-server/pkg/http/handlers"
 	"github.com/go-qiu/rrs-web-server/pkg/http/routers"
 
@@ -34,7 +33,8 @@ type AppCRUDControllers struct {
 // Application struct
 type Application struct {
 	Controllers AppControllers
-	DataStore   *ds.DataStore
+	// DataStore   *ds.DataStore
+	DataStore map[string]controllers.DataPoint
 	// Router      *mux.Router
 }
 
@@ -129,7 +129,7 @@ func (a *Application) PullDataIntoDataStore() {
 	isOk := false
 
 	// slice to cache the all the users data points retrieved from users microservice.
-	dataPoints := []dataPoint{}
+	dataPoints := []controllers.DataPoint{}
 
 	// !!!! code within this loop could potentially be made to retrieve all data points concurrently from the microservice.
 	for (pageIndex == 0) || (isOk && dataPtsCount == DATA_PTS_PER_PAGE) {
@@ -178,7 +178,7 @@ func (a *Application) PullDataIntoDataStore() {
 
 			// break down the first level map.
 
-			dp := dataPoint{}
+			dp := controllers.DataPoint{}
 
 			// loop through the second level map.
 			// get the attribute and its value.
@@ -214,10 +214,12 @@ func (a *Application) PullDataIntoDataStore() {
 
 	// add into in-memory data store.
 	for _, dp := range dataPoints {
-		err := a.DataStore.InsertNode(dp, dp.Phone)
-		if err != nil {
-			log.Fatal(err)
-		}
+		// err := a.DataStore.InsertNode(dp, dp.Phone)
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+
+		a.DataStore[dp.Phone] = dp
 	}
 
 	// accounts := stack.New()

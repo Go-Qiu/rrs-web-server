@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-qiu/rrs-web-server/pkg/application"
 	"github.com/go-qiu/rrs-web-server/pkg/controllers"
-	"github.com/go-qiu/rrs-web-server/pkg/ds"
 	"github.com/joho/godotenv"
 )
 
@@ -36,17 +35,17 @@ func main() {
 	}
 
 	// instantiate an in-memory data store, to cache the Users data points.
-	var dsUsers ds.DataStore = *ds.New()
+	// var dsUsers ds.DataStore = *ds.New()
 
 	// instantiate an application to link the respective controllers and router.
 	app := application.New()
-	app.DataStore = &dsUsers
+	app.DataStore = make(map[string]controllers.DataPoint)
 
 	// populate the users in-memory cache, using the users data from users microservice.
 	app.PullDataIntoDataStore()
 
 	// instantiate a authentication controller.
-	authCtl := controllers.NewAuthCtl("JWT AUTH SERVICE", "", &jwtConfig, nil)
+	authCtl := controllers.NewAuthCtl("JWT AUTH SERVICE", "", &jwtConfig, app.DataStore)
 	app.Controllers.Auth = authCtl
 
 	// instantiate a voucher controller.

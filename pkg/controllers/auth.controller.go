@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-qiu/rrs-web-server/pkg/ds"
+	"github.com/go-qiu/rrs-web-server/pkg/utils"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // JWTConfig is a struct for storing the JWT configuration settings.
@@ -20,7 +21,7 @@ type AuthCtl struct {
 	name      string
 	apikey    string
 	jwtConfig *JWTConfig
-	dataStore *ds.DataStore
+	dataStore map[string]DataPoint
 }
 
 var (
@@ -34,7 +35,7 @@ var (
 // NewAuthCtl sets:
 // - the apikey to use to connect to SingPass API Service
 // - the name assigned to this struct (for reference purpose)
-func NewAuthCtl(name string, apikey string, jwtConfig *JWTConfig, ds *ds.DataStore) *AuthCtl {
+func NewAuthCtl(name string, apikey string, jwtConfig *JWTConfig, ds map[string]DataPoint) *AuthCtl {
 	return &AuthCtl{
 		name:      name,
 		apikey:    apikey,
@@ -48,10 +49,59 @@ func (a *AuthCtl) Auth(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
+	// dataPont struct for handling user data and instance assertion purpose.
+
+	// userPt := dataPoint{}
+
+	// reqBody struct to facilitate request body json unmarshalling.
+	rb := struct {
+		Phone    string `json:"phone"`
+		Password string `json:"password"`
+	}{}
+
+	err := utils.ParseBody(r, &rb)
+	if err != nil {
+		customErr := errors.New(`[AUTH-CTL] fail to parse JSON body`)
+		utils.SendErrorMsgToClient(&w, customErr)
+		return
+	}
+
+	// determin if in-memory cache or microservice will be used in the proceeding steps of the flow.
+	if a.dataStore != nil {
+		// in-memory cache is available.
+		// authenticate with support from in-memory cache.
+
+		// find the user data point.
+		// found, err := a.dataStore.Find(rb.Phone)
+		found := a.dataStore[rb.Phone]
+		if found.UserID == 0 && found.Password == "" {
+			customErr := errors.New(`[AUTH-CTL] fail to authenticate`)
+			utils.SendErrorMsgToClient(&w, customErr)
+			return
+		}
+
+		// ok.  found the data point.
+
+		// ok. compare password and password hash (from data point) using bcrypt.
+		err = bcrypt.CompareHashAndPassword([]byte(found.Password), []byte(rb.Password))
+		if err != nil {
+			customErr := errors.New(`[AUTH-CTL] fail to authenticate`)
+			utils.SendErrorMsgToClient(&w, customErr)
+			return
+		}
+
+		// ok. passed all checks.
+		// ready to generate JWT.
+
+	}
+
+	// in-memory cache is NOT available
+	// authenticate with support from microservice.
+
 	// set the jwt issuer value
 	// JWT_ISSUER := a.jwtConfig.ISSUER
 
-	// set the jwt expiry time lapse (in minutes)
+	// // set the jwt expiry time lapse (in minutes)
 	// JWT_EXP_MINUTES, err := strconv.Atoi(a.jwtConfig.EXP_MIN)
 	// if err != nil {
 	// 	customErr := errors.New(`[AUTH-CTL] fail to set jwt expiry time frame`)
@@ -66,13 +116,11 @@ func (a *AuthCtl) Auth(w http.ResponseWriter, r *http.Request) {
 
 	// exp := time.Now().Add(time.Minute * time.Duration(JWT_EXP_MINUTES)).UnixMilli()
 	// pl := utils.JWTPayload{
-	// 	Id:        found.Email,
-	// 	NameFirst: found.NameFirst,
-	// 	NameLast:  found.NameLast,
-	// 	IsAgent:   found.IsAgent,
-	// 	IsActive:  found.IsActive,
-	// 	Iss:       JWT_ISSUER,
-	// 	Exp:       exp,
+	// 	Id:    userPt.UserID,
+	// 	Name:  userPt.Name,
+	// 	Phone: userPt.Phone,
+	// 	Iss:   JWT_ISSUER,
+	// 	Exp:   exp,
 	// }
 
 	// to-do:
