@@ -311,6 +311,28 @@ func (a *AuthCtl) Register(w http.ResponseWriter, r *http.Request) {
 	//
 }
 
+// VerifyToken works in complement with the middleware that execute the token verification checks.
+// When the request reach this endpint, it has a valid token.  This endpoint will return the verified JSON response body.
+func (a *AuthCtl) VerifyToken(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+
+	//
+	authorization := r.Header.Get("Authorization")
+
+	msg := fmt.Sprintln(`{
+		"ok" : true,
+		"msg" : "[AUTH-CTL]: token is valid",
+		"data" : {}
+	}`)
+
+	w.Header().Set("Authorization", authorization)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(msg))
+	//
+}
+
 // generateJWT will generate a JWT using the header and payload passed in.
 func generateJWT(payload utils.JWTPayload, config JWTConfig) (string, error) {
 
