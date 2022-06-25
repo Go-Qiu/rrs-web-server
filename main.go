@@ -39,7 +39,7 @@ func main() {
 
 	// instantiate an application to link the respective controllers and router.
 	app := application.New()
-	app.DataStore = make(map[string]controllers.DataPoint)
+	app.DataStore = make(map[string]controllers.DataPointExtended)
 
 	// populate the users in-memory cache, using the users data from users microservice.
 	app.PullDataIntoDataStore()

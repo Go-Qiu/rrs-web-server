@@ -34,7 +34,7 @@ type AppCRUDControllers struct {
 type Application struct {
 	Controllers AppControllers
 	// DataStore   *ds.DataStore
-	DataStore map[string]controllers.DataPoint
+	DataStore map[string]controllers.DataPointExtended
 	// Router      *mux.Router
 }
 
@@ -129,7 +129,7 @@ func (a *Application) PullDataIntoDataStore() {
 	isOk := false
 
 	// slice to cache the all the users data points retrieved from users microservice.
-	dataPoints := []controllers.DataPoint{}
+	dataPoints := []controllers.DataPointExtended{}
 
 	// !!!! code within this loop could potentially be made to retrieve all data points concurrently from the microservice.
 	for (pageIndex == 0) || (isOk && dataPtsCount == DATA_PTS_PER_PAGE) {
@@ -178,7 +178,7 @@ func (a *Application) PullDataIntoDataStore() {
 
 			// break down the first level map.
 
-			dp := controllers.DataPoint{}
+			dp := controllers.DataPointExtended{}
 
 			// loop through the second level map.
 			// get the attribute and its value.
