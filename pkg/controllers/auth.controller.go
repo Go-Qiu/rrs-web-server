@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/go-qiu/rrs-web-server/pkg/utils"
 	"golang.org/x/crypto/bcrypt"
@@ -66,6 +69,8 @@ func (a *AuthCtl) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	dataPt := DataPoint{}
+
 	// determin if in-memory cache or microservice will be used in the proceeding steps of the flow.
 	if a.dataStore != nil {
 		// in-memory cache is available.
@@ -92,40 +97,41 @@ func (a *AuthCtl) Auth(w http.ResponseWriter, r *http.Request) {
 
 		// ok. passed all checks.
 		// ready to generate JWT.
-
+		dataPt = found
 	}
 
 	// in-memory cache is NOT available
 	// authenticate with support from microservice.
 
 	// set the jwt issuer value
-	// JWT_ISSUER := a.jwtConfig.ISSUER
+	JWT_ISSUER := a.jwtConfig.ISSUER
 
 	// // set the jwt expiry time lapse (in minutes)
-	// JWT_EXP_MINUTES, err := strconv.Atoi(a.jwtConfig.EXP_MIN)
-	// if err != nil {
-	// 	customErr := errors.New(`[AUTH-CTL] fail to set jwt expiry time frame`)
-	// 	utils.SendErrorMsgToClient(&w, customErr)
-	// 	return
-	// }
+	JWT_EXP_MINUTES, err := strconv.Atoi(a.jwtConfig.EXP_MIN)
+	if err != nil {
+		customErr := errors.New(`[AUTH-CTL] fail to set jwt expiry time frame`)
+		utils.SendErrorMsgToClient(&w, customErr)
+		return
+	}
 
-	// auth code here.
+	exp := time.Now().Add(time.Minute * time.Duration(JWT_EXP_MINUTES)).UnixMilli()
+	pl := utils.JWTPayload{
+		Id:    dataPt.UserID,
+		Name:  dataPt.Name,
+		Phone: dataPt.Phone,
+		Iss:   JWT_ISSUER,
+		Exp:   exp,
+	}
 
 	// ok.
 	// generate JWT.
-
-	// exp := time.Now().Add(time.Minute * time.Duration(JWT_EXP_MINUTES)).UnixMilli()
-	// pl := utils.JWTPayload{
-	// 	Id:    userPt.UserID,
-	// 	Name:  userPt.Name,
-	// 	Phone: userPt.Phone,
-	// 	Iss:   JWT_ISSUER,
-	// 	Exp:   exp,
-	// }
-
-	// to-do:
-	// get jwt from SingPass (to be coded further)
-	token := "singpass"
+	token := ""
+	token, err = generateJWT(pl, *a.jwtConfig)
+	if err != nil {
+		customErr := errors.New(`[AUTH-CTL] fail to generate JWT`)
+		utils.SendForbiddenMsgToClient(&w, customErr)
+		return
+	}
 
 	// set the response header attribute, "Authorization"
 	bearerToken := fmt.Sprintf("Bearer %s", token)
@@ -136,12 +142,34 @@ func (a *AuthCtl) Auth(w http.ResponseWriter, r *http.Request) {
 		"ok": true,
 		"msg": "[AUTH-CTL]: authentication ok",
 		"data": {
-			"token": "%s"
+			"token": "%s",
+			"name" : "%s",
+			"id" : "%d",
+			"phone" : "%s"
 		}
-	}`, token)
+	}`, token, dataPt.Name, int64(dataPt.UserID), dataPt.Phone)
 
 	// send response to the requesting device
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(respBody))
 	//
+}
+
+// generateJWT will generate a JWT using the header and payload passed in.
+func generateJWT(payload utils.JWTPayload, config JWTConfig) (string, error) {
+
+	header := `{
+		"alg": "SHA512",
+		"typ" : "JWT"
+	}`
+
+	// convert payload data to json string
+	pl, err := json.Marshal(payload)
+	if err != nil {
+		return "", ErrPayloadParsing
+	}
+
+	token := utils.Generate(header, string(pl), config.SECRET_KEY)
+
+	return token, nil
 }
