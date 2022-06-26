@@ -7,4 +7,6 @@ import (
 
 func RegisterUsersRouter(router *mux.Router, ctl *controllers.UserCtl) {
 	router.HandleFunc("/{id}/transactions/type/{type_code}", ctl.GetTransactionsByType).Methods("GET")
+
+	router.HandleFunc("/{id}/points", ctl.GetPoints)
 }

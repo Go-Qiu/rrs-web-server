@@ -180,3 +180,20 @@ func (u *UserCtl) GetTransactionsByType(w http.ResponseWriter, r *http.Request) 
 	}
 
 }
+
+func (u *UserCtl) GetPoints(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// data in json string format
+	data := ""
+
+	respBody := fmt.Sprintf(`{
+		"ok" : true,
+		"msg" : "[MS-USERS]: retrieval of points collected by user, successful",
+		"data" : {%s}
+	}`, data)
+
+	// send response to the requesting device
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(respBody))
+}
