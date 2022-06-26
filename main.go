@@ -49,8 +49,12 @@ func main() {
 	app.Controllers.Auth = authCtl
 
 	// instantiate a voucher controller.
-
+	app.Controllers.CRUD.Vouchers = controllers.NewVouchersCtl("VOUCHERS", "", app.DataStore)
 	// instantiate a merchant controller.
+	app.Controllers.CRUD.Merchants = controllers.NewMerchantCtl("MERCHANTS", "", app.DataStore)
+
+	// instantiate a transaction controller.
+	app.Controllers.CRUD.Transactions = controllers.NewTransactionCtl("TRANSACTIONS", "", nil)
 
 	// app.Router = router
 

@@ -219,7 +219,7 @@ func (a *AuthCtl) Register(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// prepare the GET request.
+		// prepare the POST request.
 		apiReq, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(reqBody))
 		if err != nil {
 			customErr := errors.New(`[AUTH-CTL] registration, failed`)

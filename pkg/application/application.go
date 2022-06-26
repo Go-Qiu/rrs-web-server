@@ -25,9 +25,10 @@ type AppControllers struct {
 
 // AppCRUDControllers struct to hold all the pointers to the respective CRUD controllers.
 type AppCRUDControllers struct {
-	Users     *controllers.CRUD
-	Vouchers  *controllers.CRUD
-	Merchants *controllers.CRUD
+	Users        *controllers.UserCtl
+	Vouchers     *controllers.VouchersCtl
+	Merchants    *controllers.MerchantCtl
+	Transactions *controllers.TransactionCtl
 }
 
 // Application struct
@@ -51,15 +52,24 @@ func (a *Application) Router() *mux.Router {
 	r := mux.NewRouter()
 	PUBLIC := os.Getenv("PUBLIC")
 
-	r.HandleFunc("/", handlers.ServeHtmlIndex)
-	r.HandleFunc("/login", handlers.ServeHtmlLogin)
-	r.HandleFunc("/logout", handlers.ServeHtmlLogout)
-
 	// jwt auth api routes
 	apiRouter := r.PathPrefix("/api/v1").Subrouter()
 	routers.RegisterAuthRouter(apiRouter, a.Controllers.Auth)
 
-	// users routes
+	// users api routes
+	apiStationRouter := r.PathPrefix("/api/v1/users").Subrouter()
+	routers.RegisterStationRouter(apiStationRouter, a.Controllers.CRUD.Transactions)
+
+	// web pages routes
+
+	// home page
+	r.HandleFunc("/", handlers.ServeHtmlIndex)
+
+	// login and logout page
+	r.HandleFunc("/login", handlers.ServeHtmlLogin)
+	r.HandleFunc("/logout", handlers.ServeHtmlLogout)
+
+	// users pages
 	r.HandleFunc("/users", handlers.ServeHtmlIndexUsers)
 	r.HandleFunc("/users/registration", handlers.ServeHtmlLogin)
 	r.HandleFunc("/users/{id}", handlers.ServeHtmlUserProfile)
@@ -67,10 +77,10 @@ func (a *Application) Router() *mux.Router {
 	r.HandleFunc("/users/{id}/vouchers", handlers.ServeHtmlUserVouchers)
 	r.HandleFunc("/users/{id}/points_to_vouchers/redepmtion", handlers.ServeHtmlUserPointsToVouchers)
 
-	// vouchers routes
+	// vouchers pages
 	r.HandleFunc("/vouchers", handlers.ServeHtmlIndexVouchers)
 
-	// merchants routes
+	// merchants pages
 	r.HandleFunc("/merchants", handlers.ServeHtmlIndexMerchants)
 	r.HandleFunc("/merchants/{id}/vouchers/aquire", handlers.ServeHtmlMerchantVouchersAquisition)
 	r.HandleFunc("/merchants/{id}/vouchers/capture", handlers.ServeHtmlMerchantVoucherCapture)

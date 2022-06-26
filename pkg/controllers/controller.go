@@ -12,6 +12,8 @@ type CRUD interface {
 }
 
 type CRUDController struct {
-	Name string
+	name      string
+	apikey    string
+	dataStore map[string]DataPointExtended
 	CRUD
 }
