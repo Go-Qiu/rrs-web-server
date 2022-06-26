@@ -60,6 +60,9 @@ func (a *Application) Router() *mux.Router {
 	apiStationRouter := r.PathPrefix("/api/v1/users").Subrouter()
 	routers.RegisterStationRouter(apiStationRouter, a.Controllers.CRUD.Transactions)
 
+	apiUsersRouter := r.PathPrefix("/api/v1/users").Subrouter()
+	routers.RegisterUsersRouter(apiUsersRouter, a.Controllers.CRUD.Users)
+
 	// web pages routes
 
 	// home page
