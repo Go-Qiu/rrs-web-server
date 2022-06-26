@@ -9,6 +9,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -207,11 +208,55 @@ func hasExpired(payloadB64 string) bool {
 	}
 
 	now := time.Now().UnixMilli()
-	if pl.Exp < now {
-		// has expired
-		return true
+	// if pl.Exp < now {
+	// 	// has expired
+	// 	return true
+	// }
+
+	// // ok. has not expired.
+	// return false
+
+	return pl.Exp < now
+}
+
+func decodeJWTPayload(payloadB64 string) (JWTPayload, error) {
+	jsonString, err := base64.StdEncoding.DecodeString(payloadB64)
+	if err != nil {
+		return JWTPayload{}, err
 	}
 
-	// ok. has not expired.
-	return false
+	var pl JWTPayload
+	err = json.Unmarshal([]byte(jsonString), &pl)
+	if err != nil {
+		return JWTPayload{}, err
+	}
+
+	// ok.
+
+	return pl, nil
+}
+
+// GetJWTPayload will extract the token in the request, retrieve the payload segment of the token (in base64 encoding) and return decoded payload (in plain text).
+func GetJWTPayload(r *http.Request) (JWTPayload, error) {
+	if r.Header.Get("Authorization") == "" {
+		customErr := errors.New(`[TRANX-CTL] required token is to provided`)
+		return JWTPayload{}, customErr
+	}
+
+	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+	if token == "" {
+		customErr := errors.New(`[TRANX-CTL] token value must not be empty`)
+		return JWTPayload{}, customErr
+	}
+
+	// retrieve the payload segment in the token
+	payloadB64 := strings.Split(token, ".")
+	payload, err := decodeJWTPayload(payloadB64[1])
+	if err != nil {
+		customErr := errors.New(`[TRANX-CTL] fail to parse token`)
+		return JWTPayload{}, customErr
+	}
+
+	// ok.
+	return payload, nil
 }

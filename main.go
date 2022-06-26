@@ -54,7 +54,7 @@ func main() {
 	app.Controllers.CRUD.Merchants = controllers.NewMerchantCtl("MERCHANTS", "", app.DataStore)
 
 	// instantiate a transaction controller.
-	app.Controllers.CRUD.Transactions = controllers.NewTransactionCtl("TRANSACTIONS", "", app.DataStore)
+	app.Controllers.CRUD.Transactions = controllers.NewTransactionCtl("TRANSACTIONS", "", nil)
 
 	// app.Router = router
 
