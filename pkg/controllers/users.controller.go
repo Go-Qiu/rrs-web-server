@@ -334,15 +334,7 @@ func (u *UserCtl) PointsToVouchers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// http client to connect to users microservice.
-	// setup the client to bypass the ssl verification check so that a call to users microservice (via https, protected by self-signed ssl cert) can be done.
-	// client := &http.Client{
-	// 	Transport: &http.Transport{
-	// 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	// 	},
-	// }
-
-	// set the endpoint query string
+	// outbound request to vouchers microservice.
 	epVouchers := fmt.Sprintf(`%s/getvoucher`, os.Getenv("API_URL_VOUCHERS"))
 	optVouchers := utils.RequestOptions{
 		API: struct {
@@ -354,6 +346,7 @@ func (u *UserCtl) PointsToVouchers(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
+	// outbound request to users microservice
 	// epUsers := fmt.Sprintf(`%s/getvoucher`, os.Getenv("API_URL_USERS"))
 	// optUsers := utils.RequestOptions{
 	// 	API: struct{Key string; Username string}{
@@ -363,17 +356,27 @@ func (u *UserCtl) PointsToVouchers(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	// loop through all the requested vouchers (in inbound request), concurrently.
-	// applying the multi-producer --> one consumer pattern.
+	// applying the multi-producer --> one consumer pattern, via unbuffered channel.
 
 	var wg sync.WaitGroup
 
 	// channel used by producers to send the response out.
-	// reqs := make(chan string)
+	jobs := make(chan utils.RequestOutcome)
 
-	// channel used by consumer to signal it is done.
+	// channel used by consumer to signal it is done and send back the processed data.
 	// done := make(chan bool)
+	done := make(chan []interface{})
 
 	// loop through the inbound request body to break down all vouchers to qty of 1 pcs.
+
+	// http client to connect to users microservice.
+	// setup the client to bypass the ssl verification check so that a call to users microservice (via https, protected by self-signed ssl cert) can be done.
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
 	vouchers := utils.BreakdwonVouchersToQtyOfOneUnit(inboundBody.Vouchers)
 
 	for _, v := range vouchers {
@@ -392,9 +395,13 @@ func (u *UserCtl) PointsToVouchers(w http.ResponseWriter, r *http.Request) {
 		}
 
 		reqBody, _ := json.Marshal(rb)
+
 		// prepare the outbound post request.
 		apiReq, err := utils.PreparePostRequest(epVouchers, reqBody, optVouchers)
 		if err != nil {
+
+			customErr := errors.New("[USERS-CTL] fail to parse request")
+			utils.SendErrorMsgToClient(&w, customErr)
 
 			// exit for loop
 			break
@@ -405,8 +412,20 @@ func (u *UserCtl) PointsToVouchers(w http.ResponseWriter, r *http.Request) {
 		wg.Add(1)
 
 		// send to producer for execution concurrently.
-		go utils.PostRequest(apiReq, &wg)
+		go utils.PostRequest(client, apiReq, jobs, &wg)
 	}
+
+	// fire up the response consumer.
+	go utils.ResponseConsumer(&w, jobs, done)
+
+	// wait for all the POST request producers to complete.
+	wg.Wait()
+
+	// POST request producers are done. close the jobs channel.
+	close(jobs)
+
+	// block until response consumer is done and received a true from the done channel.
+	<-done
 
 	// generate the vouchers in voucher microservice.
 	// endpoint_v := fmt.Sprintf(`%s/getvoucher`, API_ROOT_URL)
