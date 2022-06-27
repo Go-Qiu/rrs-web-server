@@ -32,30 +32,6 @@ func (t *TransactionCtl) Create(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	// get the user id
-	// params := mux.Vars(r)
-	// id := params["id"]
-
-	// get all the input params from the inbound request.
-
-	// get from the token
-	// if r.Header.Get("Authorization") == "" {
-	// 	customErr := errors.New(`[TRANX-CTL] required token is to provided`)
-	// 	utils.SendBadRequestMsgToClient(&w, customErr)
-	// 	return
-	// }
-
-	// token := strings.TrimPrefix(r.Header.Get("Authorizatoin"), "Bearer ")
-	// if token == "" {
-	// 	customErr := errors.New(`[TRANX-CTL] token value must not be empty`)
-	// 	utils.SendBadRequestMsgToClient(&w, customErr)
-	// 	return
-	// }
-
-	// // retrieve the payload segment in the token
-	// payloadB64 := strings.Split(token, ".")
-	// payload, err := utils.DecodeJWTPayload(payloadB64[1])
-
 	// extract the payload segement of the JWT passed in via the request header.
 	payload, err := utils.GetJWTPayload(r)
 	if err != nil {
