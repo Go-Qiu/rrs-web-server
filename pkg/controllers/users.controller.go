@@ -365,17 +365,17 @@ func (u *UserCtl) PointsToVouchers(w http.ResponseWriter, r *http.Request) {
 
 	// channel used by consumer to signal it is done and send back the processed data.
 	// done := make(chan bool)
-	done := make(chan []interface{})
+	done := make(chan utils.ResponseBody)
 
 	// loop through the inbound request body to break down all vouchers to qty of 1 pcs.
 
 	// http client to connect to users microservice.
 	// setup the client to bypass the ssl verification check so that a call to users microservice (via https, protected by self-signed ssl cert) can be done.
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-	}
+	// client := &http.Client{
+	// 	Transport: &http.Transport{
+	// 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	// 	},
+	// }
 
 	vouchers := utils.BreakdwonVouchersToQtyOfOneUnit(inboundBody.Vouchers)
 
@@ -412,7 +412,7 @@ func (u *UserCtl) PointsToVouchers(w http.ResponseWriter, r *http.Request) {
 		wg.Add(1)
 
 		// send to producer for execution concurrently.
-		go utils.PostRequest(client, apiReq, jobs, &wg)
+		go utils.PostRequest(apiReq, jobs, &wg)
 	}
 
 	// fire up the response consumer.
@@ -425,7 +425,7 @@ func (u *UserCtl) PointsToVouchers(w http.ResponseWriter, r *http.Request) {
 	close(jobs)
 
 	// block until response consumer is done and received a true from the done channel.
-	<-done
+	outcome := <-done
 
 	// generate the vouchers in voucher microservice.
 	// endpoint_v := fmt.Sprintf(`%s/getvoucher`, API_ROOT_URL)
@@ -438,15 +438,20 @@ func (u *UserCtl) PointsToVouchers(w http.ResponseWriter, r *http.Request) {
 	// conclude the conversion.
 
 	// data in json string format
-	data := ""
 
-	respBody := fmt.Sprintf(`{
-		"ok" : true,
-		"msg" : "[MS-USERS]: retrieval of points collected by user, successful",
-		"data" : {%s}
-	}`, data)
+	data, err := json.Marshal(outcome.Data)
+	if err != nil {
+		customErr := errors.New(`[USERS-CTL] parse response, failed`)
+		utils.SendErrorMsgToClient(&w, customErr)
+		return
+	}
 
-	// send response to the requesting device
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(respBody))
+	if !outcome.Ok {
+		customErr := errors.New(`[USERS-CTL] point to vouchers redemption, failed`)
+		utils.SendErrorMsgToClient(&w, customErr)
+		return
+	}
+
+	// ok.
+	utils.SendDataToClient(&w, data, `[USERS-CTL] points to vouchers redemption, successful`)
 }

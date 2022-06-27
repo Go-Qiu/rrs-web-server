@@ -2,8 +2,8 @@ package utils
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"sync"
 )
@@ -29,15 +29,22 @@ type ResponseBody struct {
 }
 
 // PostRequest will send a post request, concurrently using the passed in wait group.
-func PostRequest(c *http.Client, r *http.Request, jobs chan<- RequestOutcome, wg *sync.WaitGroup) {
+func PostRequest(r *http.Request, jobs chan<- RequestOutcome, wg *sync.WaitGroup) {
 
+	defer wg.Done()
 	resp := RequestOutcome{}
 
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
 	// send out a POST request to the microservices.
-	outcome, err := c.Do(r)
-	if err != nil {
+	outcome, err := client.Do(r)
+	if err != nil || (outcome.StatusCode != http.StatusOK) {
 		resp.Ok = false
-		resp.Msg = err.Error()
+		resp.Msg = "[CON] send post request, failed"
 		resp.Outcome = nil
 
 		// send the response into the channel.
@@ -47,8 +54,8 @@ func PostRequest(c *http.Client, r *http.Request, jobs chan<- RequestOutcome, wg
 
 	// ok.
 
-	resp.Ok = false
-	resp.Msg = err.Error()
+	resp.Ok = true
+	resp.Msg = "[CONC] send post request, successful"
 	resp.Outcome = outcome
 
 	// send the response into the channel.
@@ -63,13 +70,13 @@ func FetchRequest(r *http.Request, wg *sync.WaitGroup) {
 }
 
 // ResponseConsumer will handle the response returned via the jobs channel (unbuffered).
-func ResponseConsumer(w *http.ResponseWriter, jobs <-chan RequestOutcome, done chan<- []interface{}) {
+func ResponseConsumer(w *http.ResponseWriter, jobs <-chan RequestOutcome, done chan<- ResponseBody) {
 
 	// flag to indicate at least 1 error has occurred.
 	hasError := false
 
 	// cache to harvest all the response data received.
-	data := []interface{}{}
+	dataPoints := []interface{}{}
 
 	// handle the responses received via the jobs channel.
 	for ro := range jobs {
@@ -99,17 +106,28 @@ func ResponseConsumer(w *http.ResponseWriter, jobs <-chan RequestOutcome, done c
 		if err != nil {
 			hasError = true
 		}
-		data = append(data, dp)
+		dataPoints = append(dataPoints, dp)
 	}
 
 	if hasError {
 		// error handling
-		customErr := errors.New(`[CONC] fail to parse response`)
-		SendErrorMsgToClient(w, customErr)
+		rb := ResponseBody{
+			Ok:   false,
+			Msg:  `[CONC] fail to parse response`,
+			Data: dataPoints,
+		}
+		done <- rb
+		return
 	}
 
-	// send true into the channel, to indicate all responses have been handled with no error.
-	done <- data
+	// ok.
+	rb := ResponseBody{
+		Ok:   true,
+		Msg:  `[CONC] success`,
+		Data: dataPoints,
+	}
+
+	done <- rb
 	//
 }
 
