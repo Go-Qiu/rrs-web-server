@@ -52,8 +52,6 @@ func (t *TransactionCtl) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// phone := "88081200"
-
 	// prepare the outbound post request to the users microservice.
 
 	// http client to connect to users microservice.
