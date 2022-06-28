@@ -307,6 +307,14 @@ func (a *AuthCtl) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// ok.
+	a.dataStore[dataPoints[0].Phone] = DataPointExtended{
+		UserID:    dataPoints[0].UserID,
+		Phone:     dataPoints[0].Phone,
+		Name:      dataPoints[0].Name,
+		Points:    dataPoints[0].Points,
+		LastLogin: dataPoints[0].LastLogin,
+		Password:  string(pwhash),
+	}
 	utils.SendDataToClient(&w, data, "registration, successful")
 	//
 }
