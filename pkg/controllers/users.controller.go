@@ -365,18 +365,9 @@ func (u *UserCtl) PointsToVouchers(w http.ResponseWriter, r *http.Request) {
 
 	// channel used by consumer to signal it is done and send back the processed data.
 	// done := make(chan bool)
-	done := make(chan utils.ResponseBody)
+	done := make(chan utils.Frame)
 
 	// loop through the inbound request body to break down all vouchers to qty of 1 pcs.
-
-	// http client to connect to users microservice.
-	// setup the client to bypass the ssl verification check so that a call to users microservice (via https, protected by self-signed ssl cert) can be done.
-	// client := &http.Client{
-	// 	Transport: &http.Transport{
-	// 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	// 	},
-	// }
-
 	vouchers := utils.BreakdwonVouchersToQtyOfOneUnit(inboundBody.Vouchers)
 
 	for _, v := range vouchers {
@@ -439,12 +430,12 @@ func (u *UserCtl) PointsToVouchers(w http.ResponseWriter, r *http.Request) {
 
 	// data in json string format
 
-	data, err := json.Marshal(outcome.Data)
-	if err != nil {
-		customErr := errors.New(`[USERS-CTL] parse response, failed`)
-		utils.SendErrorMsgToClient(&w, customErr)
-		return
-	}
+	// data, err := json.Marshal(outcome.Data)
+	// if err != nil {
+	// 	customErr := errors.New(`[USERS-CTL] parse response, failed`)
+	// 	utils.SendErrorMsgToClient(&w, customErr)
+	// 	return
+	// }
 
 	if !outcome.Ok {
 		customErr := errors.New(`[USERS-CTL] point to vouchers redemption, failed`)
@@ -453,5 +444,7 @@ func (u *UserCtl) PointsToVouchers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// ok.
+
+	data, _ := json.Marshal(outcome.Data)
 	utils.SendDataToClient(&w, data, `[USERS-CTL] points to vouchers redemption, successful`)
 }

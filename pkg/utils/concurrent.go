@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"net/http"
 	"sync"
 )
@@ -19,16 +18,30 @@ type RequestOptions struct {
 type RequestOutcome struct {
 	Ok      bool
 	Msg     string
-	Outcome *http.Response
+	Outcome *ResponseBody
+}
+
+type PointsToVouchersTransaction struct {
+	VID           string  `json:"vid"`
+	UserID        string  `json:"userid"`
+	Points        float64 `json:"points"`
+	ValueInDollar string  `json:"value_in_dollar"`
+	CreatedDate   string  `json:"created_date"`
 }
 
 type ResponseBody struct {
-	Ok   bool        `json:"ok"`
-	Msg  string      `json:"msg"`
-	Data interface{} `json:"data"`
+	Ok   bool                   `json:"ok"`
+	Msg  string                 `json:"msg"`
+	Data map[string]interface{} `json:"data"`
 }
 
-// PostRequest will send a post request, concurrently using the passed in wait group.
+type Frame struct {
+	Ok   bool
+	Msg  string
+	Data []PointsToVouchersTransaction
+}
+
+// PostRequest will send a post request, concurrently using the passed in wait group. The response body has a data type of map[string]interface{}.
 func PostRequest(r *http.Request, jobs chan<- RequestOutcome, wg *sync.WaitGroup) {
 
 	defer wg.Done()
@@ -43,6 +56,7 @@ func PostRequest(r *http.Request, jobs chan<- RequestOutcome, wg *sync.WaitGroup
 	// send out a POST request to the microservices.
 	outcome, err := client.Do(r)
 	if err != nil || (outcome.StatusCode != http.StatusOK) {
+		// post request failed.
 		resp.Ok = false
 		resp.Msg = "[CON] send post request, failed"
 		resp.Outcome = nil
@@ -53,10 +67,17 @@ func PostRequest(r *http.Request, jobs chan<- RequestOutcome, wg *sync.WaitGroup
 	}
 
 	// ok.
+	outcomeBody := ResponseBody{}
+	err = ParseResponseBody(outcome, &outcomeBody)
+	if err != nil {
+		resp.Ok = false
+		resp.Msg = `[CON] fail to parse response`
+		resp.Outcome = nil
+	}
 
 	resp.Ok = true
 	resp.Msg = "[CONC] send post request, successful"
-	resp.Outcome = outcome
+	resp.Outcome = &outcomeBody
 
 	// send the response into the channel.
 	jobs <- resp
@@ -70,15 +91,15 @@ func FetchRequest(r *http.Request, wg *sync.WaitGroup) {
 }
 
 // ResponseConsumer will handle the response returned via the jobs channel (unbuffered).
-func ResponseConsumer(w *http.ResponseWriter, jobs <-chan RequestOutcome, done chan<- ResponseBody) {
+func ResponseConsumer(w *http.ResponseWriter, jobs <-chan RequestOutcome, done chan<- Frame) {
 
 	// flag to indicate at least 1 error has occurred.
 	hasError := false
 
 	// cache to harvest all the response data received.
-	dataPoints := []interface{}{}
+	dataPoints := []PointsToVouchersTransaction{}
 
-	// handle the responses received via the jobs channel.
+	// handle the request outcome received via the jobs channel.
 	for ro := range jobs {
 
 		// failure in posting request.
@@ -88,30 +109,39 @@ func ResponseConsumer(w *http.ResponseWriter, jobs <-chan RequestOutcome, done c
 			continue
 		}
 
-		// handle the response.
-		var outcomeRespBody ResponseBody
-		err := ParseResponseBody(ro.Outcome, &outcomeRespBody)
-		if err != nil {
+		if !ro.Outcome.Ok {
 			hasError = true
 			continue
 		}
 
-		if !outcomeRespBody.Ok {
-			hasError = true
-		}
+		// ok. append the data into the existing dataPoints slice.
+		// dataPoints = append(dataPoints, ro.Outcome.Data...)
 
-		// ok.
+		// breakdown the map[string]interface{}
+		dp := PointsToVouchersTransaction{}
 
-		dp, err := json.Marshal(outcomeRespBody.Data)
-		if err != nil {
-			hasError = true
+		for k, v := range ro.Outcome.Data {
+			switch k {
+			case "VID":
+				dp.VID = v.(string)
+			case "UserID":
+				dp.UserID = v.(string)
+			case "Pionts":
+				dp.Points = v.(float64)
+			case "Value":
+				dp.ValueInDollar = v.(string)
+			case "CreatedDate":
+				dp.CreatedDate = v.(string)
+			}
+
 		}
 		dataPoints = append(dataPoints, dp)
+
 	}
 
 	if hasError {
 		// error handling
-		rb := ResponseBody{
+		rb := Frame{
 			Ok:   false,
 			Msg:  `[CONC] fail to parse response`,
 			Data: dataPoints,
@@ -121,7 +151,7 @@ func ResponseConsumer(w *http.ResponseWriter, jobs <-chan RequestOutcome, done c
 	}
 
 	// ok.
-	rb := ResponseBody{
+	rb := Frame{
 		Ok:   true,
 		Msg:  `[CONC] success`,
 		Data: dataPoints,
@@ -141,7 +171,7 @@ func PreparePostRequest(endpoint string, reqBody []byte, options RequestOptions)
 
 	// set all the required header attributes of this POST request.
 	apiReq.Header.Set("Content-Type", "application/json")
-	apiReq.Header.Set("apiKey", options.API.Key)
+	apiReq.Header.Set("Key", options.API.Key)
 	apiReq.Header.Set("username", options.API.Username)
 
 	return apiReq, nil
